@@ -1,7 +1,4 @@
-import {
-  // CheckFat,
-  ShoppingCart,
-} from "@phosphor-icons/react";
+import { CheckFat, ShoppingCart } from "@phosphor-icons/react";
 import {
   CoffeeImage,
   ContainerCard,
@@ -14,17 +11,20 @@ import {
 } from "./Card.styles";
 import { useTheme } from "styled-components";
 import { Quantity } from "../Inputs/Quantity/Quantity";
-import { CoffeesItensProps } from "../../mocks/data";
-import { useState } from "react";
+import { useContext, useEffect, useState } from "react";
+import { CartContext } from "../../contexts/CartContextProvider";
+import { CoffeesItens } from "../../Types/Cart.types";
 
 type PropsCard = {
-  coffee: CoffeesItensProps;
+  coffee: CoffeesItens;
 };
 
 export function Card({ coffee }: PropsCard) {
   const theme = useTheme();
+  const { addNewItensOfCart } = useContext(CartContext);
 
   const [quantity, setQuantity] = useState(1);
+  const [isItemAdded, setIsItemAdded] = useState(false);
 
   function increment() {
     if (quantity < 10) {
@@ -37,6 +37,22 @@ export function Card({ coffee }: PropsCard) {
       setQuantity((state) => state - 1);
     }
   }
+
+  useEffect(() => {
+    let timeout: number;
+
+    if (isItemAdded) {
+      timeout = setTimeout(() => {
+        setIsItemAdded(false);
+      }, 1000);
+    }
+
+    return () => {
+      if (timeout) {
+        clearTimeout(timeout);
+      }
+    };
+  }, [isItemAdded]);
 
   return (
     <ContainerCard>
@@ -61,9 +77,18 @@ export function Card({ coffee }: PropsCard) {
             decrement={decrement}
             increment={increment}
           />
-          <Buy>
-            <ShoppingCart size={22} color={theme["base-card"]} />
-            {/* <CheckFat weight="fill" size={22} color={theme["base-card"]} /> */}
+          <Buy
+            onClick={() => {
+              coffee.quantity = quantity;
+              setIsItemAdded(true);
+              addNewItensOfCart(coffee);
+            }}
+          >
+            {isItemAdded ? (
+              <CheckFat weight="fill" size={22} color={theme["base-card"]} />
+            ) : (
+              <ShoppingCart size={22} color={theme["base-card"]} />
+            )}
           </Buy>
         </div>
       </OrderCoffee>

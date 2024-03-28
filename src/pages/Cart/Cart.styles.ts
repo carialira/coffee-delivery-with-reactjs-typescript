@@ -123,7 +123,7 @@ export const CartItens = styled.div`
 `;
 
 export const CoffeeImage = styled.img`
-  transform: translateY(-20%);
+  transform: translateY(-10%);
   max-width: 6.4rem;
   max-height: 6.4rem;
   align-self: center;
@@ -211,4 +211,15 @@ export const CartButton = styled.button`
   &:hover {
     background-color: ${({ theme }) => theme["yellow-dark"]};
   }
+`;
+
+export const PaymentFormErrorMessage = styled.p`
+  ${mixins.fonts.textXS};
+  font-weight: 400;
+  color: ${({ theme }) => theme.red};
+
+  display: flex;
+  align-items: center;
+  padding: 0.5rem;
+  /* justify-content: flex-end; */
 `;

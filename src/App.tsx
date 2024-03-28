@@ -8,11 +8,11 @@ import { CartContextProvider } from "./contexts/CartContextProvider";
 function App() {
   return (
     <ThemeProvider theme={defaultTheme}>
-      <CartContextProvider>
-        <BrowserRouter>
+      <BrowserRouter>
+        <CartContextProvider>
           <Router />
-        </BrowserRouter>
-      </CartContextProvider>
+        </CartContextProvider>
+      </BrowserRouter>
       <GlobalStyle />
     </ThemeProvider>
   );

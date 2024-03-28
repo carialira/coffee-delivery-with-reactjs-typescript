@@ -1,16 +1,8 @@
 import { v4 as uuidv4 } from "uuid";
-
-export interface CoffeesItensProps {
-  id: string;
-  title: string;
-  description: string;
-  tags: Array<string>;
-  price: number;
-  image: string;
-}
+import { CoffeesItens } from "../Types/Cart.types";
 
 interface CoffeesProps {
-  coffees: Array<CoffeesItensProps>;
+  coffees: Array<Omit<CoffeesItens, "quantity">>;
 }
 
 export const dataCoffees: CoffeesProps = {

@@ -1,3 +1,7 @@
+import { SubmitHandler, useForm } from "react-hook-form";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+
 import {
   Bank,
   CreditCard,
@@ -22,19 +26,72 @@ import {
   CartTotal,
   CoffeeImage,
   CartButton,
+  PaymentFormErrorMessage,
 } from "./Cart.styles";
 import { useTheme } from "styled-components";
 import { InputText } from "../../components/Inputs/Text/Text";
 import { Radio } from "../../components/Inputs/Radio/Radio";
 import { Quantity } from "../../components/Inputs/Quantity/Quantity";
+import { useContext } from "react";
+import { CartContext } from "../../contexts/CartContextProvider";
+
+const newOrder = z.object({
+  cep: z.number({ invalid_type_error: "Informe o CEP" }),
+  rua: z.string().min(1, "Informe a rua"),
+  numero: z.string().min(1, "Informe o número"),
+  complemento: z.string(),
+  bairro: z.string().min(1, "Informe o bairro"),
+  cidade: z.string().min(1, "Informe a cidade"),
+  estado: z.string().min(1, "Informe a UF"),
+  formaPagamento: z.enum(["credito", "debito", "dinheiro"], {
+    invalid_type_error: "Selecione uma forma de pagamento acima, por favor.",
+  }),
+});
+
+export type OrderDetails = z.infer<typeof newOrder>;
 
 export function Cart() {
   const theme = useTheme();
+
+  const { cart } = useContext(CartContext);
+
+  const {
+    register,
+    handleSubmit,
+    watch,
+    formState: { errors },
+  } = useForm<OrderDetails>({
+    resolver: zodResolver(newOrder),
+  });
+
+  const selectedPaymentMethod = watch("formaPagamento");
+
+  const handleOrderCheckout: SubmitHandler<OrderDetails> = (data) => {
+    // if (cart.length === 0) {
+    console.log(data, "data");
+    return alert("É preciso ter pelo menos um item no carrinho");
+    // }
+
+    // checkout(data)
+  };
+
+  const totalItems =
+    cart && cart.length > 0
+      ? cart.reduce((acc, value) => {
+          const quantity = value.quantity ?? 1;
+          return (acc += value.price * quantity);
+        }, 0)
+      : 0;
+
+  const deliveryPrice = 3.5;
+
+  const totalCart = totalItems > 0 ? totalItems + deliveryPrice : 0;
+
   return (
     <ContainerCart>
       <Content>
         <h2>Complete seu pedido</h2>
-        <form id="orderCoffee">
+        <form id="orderCoffee" onSubmit={handleSubmit(handleOrderCheckout)}>
           <AddressContent>
             <AddressHeader>
               <MapPin size={22} fill={theme["yellow-dark"]} />
@@ -45,40 +102,48 @@ export function Cart() {
             </AddressHeader>
             <AddressForm>
               <InputText
-                name="cep"
                 placeholder="CEP"
                 inputProps={{ style: { gridArea: "cep" } }}
+                {...register("cep")}
+                error={errors.cep}
               />
               <InputText
-                name="rua"
                 placeholder="Rua"
                 inputProps={{ style: { gridArea: "rua" } }}
+                {...register("rua")}
+                error={errors.rua}
               />
               <InputText
-                name="numero"
                 placeholder="Número"
                 inputProps={{ style: { gridArea: "numero" } }}
+                {...register("numero")}
+                error={errors.numero}
               />
               <InputText
-                name="complemento"
                 placeholder="Complemento"
                 inputProps={{ style: { gridArea: "complemento" } }}
                 optional
+                {...register("complemento")}
+                error={errors.complemento}
               />
               <InputText
-                name="bairro"
                 placeholder="Bairro"
                 inputProps={{ style: { gridArea: "bairro" } }}
+                {...register("bairro")}
+                error={errors.bairro}
               />
               <InputText
-                name="cidade"
                 placeholder="Cidade"
                 inputProps={{ style: { gridArea: "cidade" } }}
+                {...register("cidade")}
+                error={errors.cidade}
               />
               <InputText
-                name="uf"
                 placeholder="UF"
+                maxLength={2}
                 inputProps={{ style: { gridArea: "estado" } }}
+                {...register("estado")}
+                error={errors.estado}
               />
             </AddressForm>
           </AddressContent>
@@ -97,19 +162,37 @@ export function Cart() {
             </PaymentHeader>
             <PaymentForm>
               <div>
-                <Radio>
+                <Radio
+                  isSelected={selectedPaymentMethod === "credito"}
+                  {...register("formaPagamento")}
+                  value="credito"
+                >
                   <CreditCard size={16} />
                   <span>Cartão de Crédito</span>
                 </Radio>
-                <Radio isSelected>
+                <Radio
+                  isSelected={selectedPaymentMethod === "debito"}
+                  {...register("formaPagamento")}
+                  value="debito"
+                >
                   <Bank size={16} />
                   <span>Cartão de Débito</span>
                 </Radio>
-                <Radio>
+                <Radio
+                  isSelected={selectedPaymentMethod === "dinheiro"}
+                  {...register("formaPagamento")}
+                  value="dinheiro"
+                >
                   <Money size={16} />
                   <span>Dinheiro </span>
                 </Radio>
               </div>
+
+              {errors.formaPagamento ? (
+                <PaymentFormErrorMessage role="alert">
+                  {errors.formaPagamento.message}
+                </PaymentFormErrorMessage>
+              ) : null}
             </PaymentForm>
           </PaymentContent>
         </form>
@@ -117,62 +200,56 @@ export function Cart() {
       <Content>
         <h2>Cafés selecionados</h2>
         <CartContent>
-          <CartItens>
-            <div>
-              <CoffeeImage
-                src="../../../public/images/Type=Americano.png"
-                alt="café"
-              />
-              <CartInfoItens>
-                <span>Expresso Americano</span>
-                <CartUpdanteItens>
-                  <Quantity />
-                  <button type="button">
-                    <Trash />
-                    <span>Remover</span>
-                  </button>
-                </CartUpdanteItens>
-              </CartInfoItens>
-            </div>
-            <aside>R$ 9,99</aside>
-          </CartItens>
-          <CartItens>
-            <div>
-              <CoffeeImage
-                src="../../../public/images/Type=Americano.png"
-                alt="café"
-              />
-              <CartInfoItens>
-                <span>Expresso Tradicional</span>
-                <CartUpdanteItens>
-                  <Quantity />
-                  <button type="button">
-                    <Trash />
-                    <span>Remover</span>
-                  </button>
-                </CartUpdanteItens>
-              </CartInfoItens>
-            </div>
-            <aside>R$ 9,99</aside>
-          </CartItens>
+          {cart &&
+            cart.length > 0 &&
+            cart.map((cof) => {
+              return (
+                <CartItens key={cof.id}>
+                  <div>
+                    <CoffeeImage src={cof.image} alt="café" />
+                    <CartInfoItens>
+                      <span>{cof.description}</span>
+                      <CartUpdanteItens>
+                        <Quantity quantity={cof.quantity} />
+                        <button type="button">
+                          <Trash />
+                          <span>Remover</span>
+                        </button>
+                      </CartUpdanteItens>
+                    </CartInfoItens>
+                  </div>
+                  <aside>R$ {cof.price?.toFixed(2)}</aside>
+                </CartItens>
+              );
+            })}
+
           <CartTotal>
             <div>
               <span>Total de itens</span>
               <span>
-                R$ 9,90
-                {/* {new Intl.NumberFormat("pt-br", {
+                {new Intl.NumberFormat("pt-br", {
                   currency: "BRL",
                   style: "currency",
-                }).format("9.90")} */}
+                }).format(totalItems)}
               </span>
             </div>
             <div>
               <span>Entrega</span>
-              <span>R$ 3,50</span>
+              <span>
+                {new Intl.NumberFormat("pt-br", {
+                  currency: "BRL",
+                  style: "currency",
+                }).format(deliveryPrice)}
+              </span>
             </div>
             <div>
               <span>Total</span>
-              <span>R$ 33,10</span>
+              <span>
+                {new Intl.NumberFormat("pt-br", {
+                  currency: "BRL",
+                  style: "currency",
+                }).format(totalCart)}
+              </span>
             </div>
           </CartTotal>
 

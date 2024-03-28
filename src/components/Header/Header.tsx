@@ -1,8 +1,12 @@
 import { MapPin, ShoppingCart } from "phosphor-react";
 import { ContainerHeader } from "./Header.styles";
 import { Link } from "react-router-dom";
+import { useContext } from "react";
+import { CartContext } from "../../contexts/CartContextProvider";
 
 export function Header() {
+  const { cart } = useContext(CartContext);
+
   return (
     <ContainerHeader>
       <Link to="/">
@@ -15,7 +19,7 @@ export function Header() {
         </div>
         <Link to="/cart">
           <ShoppingCart size={26} weight="fill" />
-          <span>2</span>
+          {cart && cart.length > 0 && <span>{cart?.length}</span>}
         </Link>
       </aside>
     </ContainerHeader>

@@ -79,6 +79,7 @@ export function Home() {
         <h2>Nossos cafés</h2>
         <div className="listCard">
           {dataCoffees.coffees.map((coffee) => {
+            console.log(coffee);
             return <Card key={coffee.id} coffee={coffee} />;
           })}
         </div>
