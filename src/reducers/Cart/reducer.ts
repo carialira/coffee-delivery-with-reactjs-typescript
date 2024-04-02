@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable no-case-declarations */
 import { produce } from "immer";
+import { v4 as uuidv4 } from "uuid";
 
 import { NavigateFunction } from "react-router-dom";
 import { ActionTypes } from "./action";
@@ -46,7 +47,15 @@ export function cartReducer(state: CartState, action: any) {
   switch (action.type) {
     case ActionTypes.ADD_ITEM_TO_CART:
       return produce(state, (draft) => {
-        draft.cart.push(action.payload.item);
+        const itemExistInCart = draft.cart.find(
+          (item) => item.id === action.payload.item.id
+        );
+
+        if (itemExistInCart) {
+          itemExistInCart.quantity += action.payload.item.quantity;
+        } else {
+          draft.cart.push(action.payload.item);
+        }
       });
 
     case ActionTypes.REMOVE_ITEM_TO_CART:
@@ -78,6 +87,24 @@ export function cartReducer(state: CartState, action: any) {
         ) {
           draft.cart[findIndexDecrement].quantity! -= 1;
         }
+      });
+
+    case ActionTypes.CHECKOUT_CART:
+      return produce(state, (draft) => {
+        const { order, callback } = action.payload;
+
+        const newOrder: Order = {
+          id: uuidv4(),
+          items: state.cart,
+          ...order,
+        };
+
+        draft.orders.push(newOrder);
+        draft.cart = [];
+        console.log("cart");
+        console.log("orders");
+
+        callback(`/order/${newOrder.id}/success`);
       });
 
     default:

@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import { CoffeesItens } from "../../types/Cart.types";
+import { NavigateFunction } from "react-router-dom";
+import { CoffeesItens, FormCartInputs } from "../../types/Cart.types";
 
 export enum ActionTypes {
   ADD_ITEM_TO_CART = "ADD_ITEM_TO_CART",
@@ -46,6 +47,19 @@ export function decrementItemQuantityToCart(itemId: CoffeesItens["id"]) {
     type: ActionTypes.DECREMENT_ITEM_QUANTITY_TO_CART,
     payload: {
       itemId,
+    },
+  };
+}
+
+export function checktoutToCart(
+  order: FormCartInputs,
+  callback: NavigateFunction
+) {
+  return {
+    type: ActionTypes.CHECKOUT_CART,
+    payload: {
+      order,
+      callback,
     },
   };
 }

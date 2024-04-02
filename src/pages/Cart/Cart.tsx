@@ -1,7 +1,6 @@
 import { SubmitHandler, useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-
 import {
   Bank,
   CreditCard,
@@ -55,8 +54,13 @@ export function Cart() {
   const navigate = useNavigate();
   const theme = useTheme();
 
-  const { cart, removeItemOfCart, incrementQuantity, decrementQuantity } =
-    useContext(CartContext);
+  const {
+    cart,
+    removeItemOfCart,
+    incrementQuantity,
+    decrementQuantity,
+    checkoutCart,
+  } = useContext(CartContext);
 
   const {
     register,
@@ -69,13 +73,12 @@ export function Cart() {
 
   const selectedPaymentMethod = watch("formaPagamento");
 
-  const handleOrderCheckout: SubmitHandler<OrderDetails> = (data) => {
-    // if (cart.length === 0) {
-    console.log(data, "data");
-    return alert("É preciso ter pelo menos um item no carrinho");
-    // }
+  const handleOrderCheckout: SubmitHandler<OrderDetails> = async (data) => {
+    if (!cart || cart.length === 0) {
+      return alert("É preciso ter pelo menos um item no carrinho");
+    }
 
-    // checkout(data)
+    await checkoutCart(data);
   };
 
   const totalItems =
@@ -115,7 +118,7 @@ export function Cart() {
                   <InputText
                     placeholder="CEP"
                     inputProps={{ style: { gridArea: "cep" } }}
-                    {...register("cep")}
+                    {...register("cep", { valueAsNumber: true })}
                     error={errors.cep}
                   />
                   <InputText
@@ -219,7 +222,7 @@ export function Cart() {
                       <div>
                         <CoffeeImage src={cof.image} alt="café" />
                         <CartInfoItens>
-                          <span>{cof.description}</span>
+                          <span>{cof.title}</span>
                           <CartUpdanteItens>
                             <Quantity
                               quantity={cof.quantity}

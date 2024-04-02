@@ -7,9 +7,27 @@ import {
   HeaderContentSuccess,
 } from "./Success.styles";
 import { useTheme } from "styled-components";
+import { useContext } from "react";
+import { CartContext } from "../../contexts/CartContextProvider";
+import { useParams } from "react-router-dom";
+import { Order } from "../../types/Cart.types";
 
 export function Success() {
   const theme = useTheme();
+  const { orders } = useContext(CartContext);
+  const { orderId } = useParams();
+
+  const orderDetails: Order = orders?.find((order) => order.id === orderId);
+  console.log(orderId, "orderId");
+  console.log(orderDetails, "orderDetails");
+  console.log(orders, "orders");
+
+  const paymentMethod = {
+    credito: "Cartão de crédito",
+    debito: "Cartão de débito",
+    dinheiro: "Dinheiro",
+  };
+
   return (
     <ContainerSuccess>
       <ContentSuccess>
@@ -28,9 +46,15 @@ export function Success() {
               />
               <div>
                 <span>
-                  Entrega em <strong>Rua João Daniel Martinelli, 102</strong>
+                  Entrega em{" "}
+                  <strong>
+                    {orderDetails.rua}, {orderDetails.numero}
+                  </strong>
                 </span>
-                <span>Farrapos - Porto Alegre, RS</span>
+                <span>
+                  {orderDetails.bairro} - {orderDetails.cidade},{" "}
+                  {orderDetails.estado.toUpperCase()}
+                </span>
               </div>
             </div>
             <div>
@@ -53,7 +77,7 @@ export function Success() {
               />
               <div>
                 <span>Pagamento na entrega</span>
-                <strong>Cartão de Crédito</strong>
+                <strong>{paymentMethod[orderDetails.formaPagamento]}</strong>
               </div>
             </div>
           </AddressDelivery>

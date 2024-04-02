@@ -21,6 +21,6 @@ export type FormCartInputs = {
 };
 
 export interface Order extends FormCartInputs {
-  id: number;
+  id: string;
   items: CoffeesItens[];
 }
