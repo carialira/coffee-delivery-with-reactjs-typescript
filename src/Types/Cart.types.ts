@@ -4,7 +4,8 @@ export interface CoffeesItens {
   description: string;
   tags: Array<string>;
   price: number;
-  quantity?: number;
+  quantity?: number | undefined;
+  totalPrice?: number | undefined;
   image: string;
 }
 

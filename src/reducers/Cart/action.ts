@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import { CoffeesItens } from "../../Types/Cart.types";
+import { CoffeesItens } from "../../types/Cart.types";
 
 export enum ActionTypes {
   ADD_ITEM_TO_CART = "ADD_ITEM_TO_CART",
@@ -11,6 +11,10 @@ export enum ActionTypes {
 }
 
 export function addItemToCart(item: CoffeesItens) {
+  if (item.quantity) {
+    const calc = item.price * item.quantity;
+    item.totalPrice = calc;
+  }
   return {
     type: ActionTypes.ADD_ITEM_TO_CART,
     payload: {
@@ -19,8 +23,29 @@ export function addItemToCart(item: CoffeesItens) {
   };
 }
 
-export function removeItemToCart() {}
+export function removeItemToCart(itemId: CoffeesItens["id"]) {
+  return {
+    type: ActionTypes.REMOVE_ITEM_TO_CART,
+    payload: {
+      itemId,
+    },
+  };
+}
 
-export function incrementItemQuantityToCart() {}
+export function incrementItemQuantityToCart(itemId: CoffeesItens["id"]) {
+  return {
+    type: ActionTypes.INCREMENT_ITEM_QUANTITY_TO_CART,
+    payload: {
+      itemId,
+    },
+  };
+}
 
-export function decrementItemQuantityToCart() {}
+export function decrementItemQuantityToCart(itemId: CoffeesItens["id"]) {
+  return {
+    type: ActionTypes.DECREMENT_ITEM_QUANTITY_TO_CART,
+    payload: {
+      itemId,
+    },
+  };
+}

@@ -75,5 +75,9 @@ export const ContainerHeader = styled.div`
 
   @media (max-width: 60em) {
     padding: 3.2rem 2rem;
+
+    aside a {
+      margin-right: 1rem;
+    }
   }
 `;

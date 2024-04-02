@@ -2,16 +2,22 @@
 import { ReactNode, createContext, useEffect, useReducer } from "react";
 // import { CoffeesItens } from "../mocks/data";
 import { cartReducer } from "../reducers/Cart/reducer";
-import { CoffeesItens, Order } from "../Types/Cart.types";
-import { addItemToCart } from "../reducers/Cart/action";
+import { CoffeesItens, Order } from "../types/Cart.types";
+import {
+  addItemToCart,
+  decrementItemQuantityToCart,
+  incrementItemQuantityToCart,
+  removeItemToCart,
+} from "../reducers/Cart/action";
+// import { useNavigate } from "react-router-dom";
 
 interface CartContextType {
   cart?: CoffeesItens[];
   orders?: Order[];
   addNewItensOfCart: (item: CoffeesItens) => void;
-  // remove: (itemId: Item['id']) => void
-  // decrementQuantity: (itemId: Item['id']) => void
-  // incrementQuantity: (itemId: Item['id']) => void
+  removeItemOfCart: (itemId: CoffeesItens["id"]) => void;
+  incrementQuantity: (itemId: CoffeesItens["id"]) => void;
+  decrementQuantity: (itemId: CoffeesItens["id"]) => void;
   // checkout: (order: OrderInfo) => void
 }
 
@@ -22,6 +28,8 @@ interface CartContextProviderProps {
 }
 
 export function CartContextProvider({ children }: CartContextProviderProps) {
+  // const navigate = useNavigate();
+
   const [cartState, dispatch] = useReducer(
     cartReducer,
     {
@@ -32,7 +40,6 @@ export function CartContextProvider({ children }: CartContextProviderProps) {
       const setStoredStateAsJSON = localStorage.getItem(
         "@coffee-delivery:cart-state-1.0.0"
       );
-
       if (setStoredStateAsJSON) {
         return JSON.parse(setStoredStateAsJSON);
       }
@@ -45,11 +52,22 @@ export function CartContextProvider({ children }: CartContextProviderProps) {
 
   useEffect(() => {
     const stateJson = JSON.stringify(cartState);
-    localStorage.setItem('@coffee-delivery:cart-state-1.0.0"', stateJson);
+    localStorage.setItem("@coffee-delivery:cart-state-1.0.0", stateJson);
   }, [cartState]);
 
   function addNewItensOfCart(item: CoffeesItens) {
     dispatch(addItemToCart(item));
+  }
+
+  function removeItemOfCart(itemId: CoffeesItens["id"]) {
+    dispatch(removeItemToCart(itemId));
+  }
+
+  function incrementQuantity(itemId: CoffeesItens["id"]) {
+    dispatch(incrementItemQuantityToCart(itemId));
+  }
+  function decrementQuantity(itemId: CoffeesItens["id"]) {
+    dispatch(decrementItemQuantityToCart(itemId));
   }
 
   return (
@@ -58,6 +76,9 @@ export function CartContextProvider({ children }: CartContextProviderProps) {
         cart,
         orders,
         addNewItensOfCart,
+        removeItemOfCart,
+        incrementQuantity,
+        decrementQuantity,
       }}
     >
       {children}

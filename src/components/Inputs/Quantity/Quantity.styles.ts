@@ -18,7 +18,7 @@ export const Container = styled.div`
     background: transparent;
     color: ${({ theme }) => theme.purple};
 
-    &:hover {
+    &:not(:disabled):hover {
       color: ${({ theme }) => theme["purple-dark"]};
     }
   }

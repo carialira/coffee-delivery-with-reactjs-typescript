@@ -32,8 +32,9 @@ import { useTheme } from "styled-components";
 import { InputText } from "../../components/Inputs/Text/Text";
 import { Radio } from "../../components/Inputs/Radio/Radio";
 import { Quantity } from "../../components/Inputs/Quantity/Quantity";
-import { useContext } from "react";
+import { useContext, useEffect } from "react";
 import { CartContext } from "../../contexts/CartContextProvider";
+import { useNavigate } from "react-router-dom";
 
 const newOrder = z.object({
   cep: z.number({ invalid_type_error: "Informe o CEP" }),
@@ -51,9 +52,11 @@ const newOrder = z.object({
 export type OrderDetails = z.infer<typeof newOrder>;
 
 export function Cart() {
+  const navigate = useNavigate();
   const theme = useTheme();
 
-  const { cart } = useContext(CartContext);
+  const { cart, removeItemOfCart, incrementQuantity, decrementQuantity } =
+    useContext(CartContext);
 
   const {
     register,
@@ -87,177 +90,196 @@ export function Cart() {
 
   const totalCart = totalItems > 0 ? totalItems + deliveryPrice : 0;
 
+  useEffect(() => {
+    if (cart && cart.length <= 0) {
+      navigate("/");
+    }
+  }, []);
+
   return (
     <ContainerCart>
-      <Content>
-        <h2>Complete seu pedido</h2>
-        <form id="orderCoffee" onSubmit={handleSubmit(handleOrderCheckout)}>
-          <AddressContent>
-            <AddressHeader>
-              <MapPin size={22} fill={theme["yellow-dark"]} />
-              <div>
-                <span>Endereço de Entrega</span>
-                <p>Informe o endereço onde deseja receber o seu pedido</p>
-              </div>
-            </AddressHeader>
-            <AddressForm>
-              <InputText
-                placeholder="CEP"
-                inputProps={{ style: { gridArea: "cep" } }}
-                {...register("cep")}
-                error={errors.cep}
-              />
-              <InputText
-                placeholder="Rua"
-                inputProps={{ style: { gridArea: "rua" } }}
-                {...register("rua")}
-                error={errors.rua}
-              />
-              <InputText
-                placeholder="Número"
-                inputProps={{ style: { gridArea: "numero" } }}
-                {...register("numero")}
-                error={errors.numero}
-              />
-              <InputText
-                placeholder="Complemento"
-                inputProps={{ style: { gridArea: "complemento" } }}
-                optional
-                {...register("complemento")}
-                error={errors.complemento}
-              />
-              <InputText
-                placeholder="Bairro"
-                inputProps={{ style: { gridArea: "bairro" } }}
-                {...register("bairro")}
-                error={errors.bairro}
-              />
-              <InputText
-                placeholder="Cidade"
-                inputProps={{ style: { gridArea: "cidade" } }}
-                {...register("cidade")}
-                error={errors.cidade}
-              />
-              <InputText
-                placeholder="UF"
-                maxLength={2}
-                inputProps={{ style: { gridArea: "estado" } }}
-                {...register("estado")}
-                error={errors.estado}
-              />
-            </AddressForm>
-          </AddressContent>
-          <PaymentContent>
-            <PaymentHeader>
-              <CurrencyDollar size={22} fill={theme.purple} />
-
-              <div>
-                <span>Pagamento</span>
-
-                <p>
-                  O pagamento é feito na entrega. Escolha a forma que deseja
-                  pagar
-                </p>
-              </div>
-            </PaymentHeader>
-            <PaymentForm>
-              <div>
-                <Radio
-                  isSelected={selectedPaymentMethod === "credito"}
-                  {...register("formaPagamento")}
-                  value="credito"
-                >
-                  <CreditCard size={16} />
-                  <span>Cartão de Crédito</span>
-                </Radio>
-                <Radio
-                  isSelected={selectedPaymentMethod === "debito"}
-                  {...register("formaPagamento")}
-                  value="debito"
-                >
-                  <Bank size={16} />
-                  <span>Cartão de Débito</span>
-                </Radio>
-                <Radio
-                  isSelected={selectedPaymentMethod === "dinheiro"}
-                  {...register("formaPagamento")}
-                  value="dinheiro"
-                >
-                  <Money size={16} />
-                  <span>Dinheiro </span>
-                </Radio>
-              </div>
-
-              {errors.formaPagamento ? (
-                <PaymentFormErrorMessage role="alert">
-                  {errors.formaPagamento.message}
-                </PaymentFormErrorMessage>
-              ) : null}
-            </PaymentForm>
-          </PaymentContent>
-        </form>
-      </Content>
-      <Content>
-        <h2>Cafés selecionados</h2>
-        <CartContent>
-          {cart &&
-            cart.length > 0 &&
-            cart.map((cof) => {
-              return (
-                <CartItens key={cof.id}>
+      {cart && cart.length > 0 && (
+        <>
+          <Content>
+            <h2>Complete seu pedido</h2>
+            <form id="orderCoffee" onSubmit={handleSubmit(handleOrderCheckout)}>
+              <AddressContent>
+                <AddressHeader>
+                  <MapPin size={22} fill={theme["yellow-dark"]} />
                   <div>
-                    <CoffeeImage src={cof.image} alt="café" />
-                    <CartInfoItens>
-                      <span>{cof.description}</span>
-                      <CartUpdanteItens>
-                        <Quantity quantity={cof.quantity} />
-                        <button type="button">
-                          <Trash />
-                          <span>Remover</span>
-                        </button>
-                      </CartUpdanteItens>
-                    </CartInfoItens>
+                    <span>Endereço de Entrega</span>
+                    <p>Informe o endereço onde deseja receber o seu pedido</p>
                   </div>
-                  <aside>R$ {cof.price?.toFixed(2)}</aside>
-                </CartItens>
-              );
-            })}
+                </AddressHeader>
+                <AddressForm>
+                  <InputText
+                    placeholder="CEP"
+                    inputProps={{ style: { gridArea: "cep" } }}
+                    {...register("cep")}
+                    error={errors.cep}
+                  />
+                  <InputText
+                    placeholder="Rua"
+                    inputProps={{ style: { gridArea: "rua" } }}
+                    {...register("rua")}
+                    error={errors.rua}
+                  />
+                  <InputText
+                    placeholder="Número"
+                    inputProps={{ style: { gridArea: "numero" } }}
+                    {...register("numero")}
+                    error={errors.numero}
+                  />
+                  <InputText
+                    placeholder="Complemento"
+                    inputProps={{ style: { gridArea: "complemento" } }}
+                    optional
+                    {...register("complemento")}
+                    error={errors.complemento}
+                  />
+                  <InputText
+                    placeholder="Bairro"
+                    inputProps={{ style: { gridArea: "bairro" } }}
+                    {...register("bairro")}
+                    error={errors.bairro}
+                  />
+                  <InputText
+                    placeholder="Cidade"
+                    inputProps={{ style: { gridArea: "cidade" } }}
+                    {...register("cidade")}
+                    error={errors.cidade}
+                  />
+                  <InputText
+                    placeholder="UF"
+                    maxLength={2}
+                    inputProps={{ style: { gridArea: "estado" } }}
+                    {...register("estado")}
+                    error={errors.estado}
+                  />
+                </AddressForm>
+              </AddressContent>
+              <PaymentContent>
+                <PaymentHeader>
+                  <CurrencyDollar size={22} fill={theme.purple} />
 
-          <CartTotal>
-            <div>
-              <span>Total de itens</span>
-              <span>
-                {new Intl.NumberFormat("pt-br", {
-                  currency: "BRL",
-                  style: "currency",
-                }).format(totalItems)}
-              </span>
-            </div>
-            <div>
-              <span>Entrega</span>
-              <span>
-                {new Intl.NumberFormat("pt-br", {
-                  currency: "BRL",
-                  style: "currency",
-                }).format(deliveryPrice)}
-              </span>
-            </div>
-            <div>
-              <span>Total</span>
-              <span>
-                {new Intl.NumberFormat("pt-br", {
-                  currency: "BRL",
-                  style: "currency",
-                }).format(totalCart)}
-              </span>
-            </div>
-          </CartTotal>
+                  <div>
+                    <span>Pagamento</span>
 
-          <CartButton type="submit" form="orderCoffee">
-            Confirmar pedido
-          </CartButton>
-        </CartContent>
-      </Content>
+                    <p>
+                      O pagamento é feito na entrega. Escolha a forma que deseja
+                      pagar
+                    </p>
+                  </div>
+                </PaymentHeader>
+                <PaymentForm>
+                  <div>
+                    <Radio
+                      isSelected={selectedPaymentMethod === "credito"}
+                      {...register("formaPagamento")}
+                      value="credito"
+                    >
+                      <CreditCard size={16} />
+                      <span>Cartão de Crédito</span>
+                    </Radio>
+                    <Radio
+                      isSelected={selectedPaymentMethod === "debito"}
+                      {...register("formaPagamento")}
+                      value="debito"
+                    >
+                      <Bank size={16} />
+                      <span>Cartão de Débito</span>
+                    </Radio>
+                    <Radio
+                      isSelected={selectedPaymentMethod === "dinheiro"}
+                      {...register("formaPagamento")}
+                      value="dinheiro"
+                    >
+                      <Money size={16} />
+                      <span>Dinheiro </span>
+                    </Radio>
+                  </div>
+
+                  {errors.formaPagamento ? (
+                    <PaymentFormErrorMessage role="alert">
+                      {errors.formaPagamento.message}
+                    </PaymentFormErrorMessage>
+                  ) : null}
+                </PaymentForm>
+              </PaymentContent>
+            </form>
+          </Content>
+          <Content>
+            <h2>Cafés selecionados</h2>
+            <CartContent>
+              {cart &&
+                cart.length > 0 &&
+                cart.map((cof) => {
+                  return (
+                    <CartItens key={cof.id}>
+                      <div>
+                        <CoffeeImage src={cof.image} alt="café" />
+                        <CartInfoItens>
+                          <span>{cof.description}</span>
+                          <CartUpdanteItens>
+                            <Quantity
+                              quantity={cof.quantity}
+                              increment={() => incrementQuantity(cof.id)}
+                              decrement={() => decrementQuantity(cof.id)}
+                            />
+                            <button
+                              type="button"
+                              onClick={() => {
+                                removeItemOfCart(cof.id);
+                              }}
+                            >
+                              <Trash />
+                              <span>Remover</span>
+                            </button>
+                          </CartUpdanteItens>
+                        </CartInfoItens>
+                      </div>
+                      <aside>R$ {cof.price?.toFixed(2)}</aside>
+                    </CartItens>
+                  );
+                })}
+
+              <CartTotal>
+                <div>
+                  <span>Total de itens</span>
+                  <span>
+                    {new Intl.NumberFormat("pt-br", {
+                      currency: "BRL",
+                      style: "currency",
+                    }).format(totalItems)}
+                  </span>
+                </div>
+                <div>
+                  <span>Entrega</span>
+                  <span>
+                    {new Intl.NumberFormat("pt-br", {
+                      currency: "BRL",
+                      style: "currency",
+                    }).format(deliveryPrice)}
+                  </span>
+                </div>
+                <div>
+                  <span>Total</span>
+                  <span>
+                    {new Intl.NumberFormat("pt-br", {
+                      currency: "BRL",
+                      style: "currency",
+                    }).format(totalCart)}
+                  </span>
+                </div>
+              </CartTotal>
+
+              <CartButton type="submit" form="orderCoffee">
+                Confirmar pedido
+              </CartButton>
+            </CartContent>
+          </Content>
+        </>
+      )}
     </ContainerCart>
   );
 }

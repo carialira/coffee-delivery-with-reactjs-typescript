@@ -11,7 +11,7 @@ export const Radio = forwardRef(function Radio(
   ref: LegacyRef<HTMLInputElement>
 ) {
   return (
-    <ContainerLabel isSelected={isSelected}>
+    <ContainerLabel $isSelected={isSelected}>
       <input type="radio" ref={ref} {...rest} />
       {children}
     </ContainerLabel>

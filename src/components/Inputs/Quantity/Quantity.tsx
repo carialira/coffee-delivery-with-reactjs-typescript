@@ -10,7 +10,11 @@ type QuantityProps = {
 export function Quantity({ quantity, increment, decrement }: QuantityProps) {
   return (
     <Container>
-      <button onClick={decrement}>
+      <button
+        onClick={decrement}
+        disabled={quantity === 1}
+        style={{ opacity: quantity === 1 ? 0.4 : 1 }}
+      >
         <Minus size={14} />
       </button>
       <span>{quantity}</span>

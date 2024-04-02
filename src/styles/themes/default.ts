@@ -20,4 +20,8 @@ export const defaultTheme = {
   "base-button": "#E6E5E5",
   "base-input": "#EDEDED",
   "base-card": "#F3F2F2",
+
+  "snackbar-info": "#2196f3",
+  "snackbar-sucess": "#4caf50",
+  "snackbar-error": "#f44336",
 };

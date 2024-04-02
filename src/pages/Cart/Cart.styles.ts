@@ -10,8 +10,10 @@ export const ContainerCart = styled.div`
   margin: 0 auto;
   gap: 3.2rem;
 
-  @media (max-width: 87.5em) {
+  @media (max-width: 80em) {
+    border: 1px solid red;
     flex-direction: column;
+    padding: 0.5rem 1rem 1rem;
   }
 
   @media (max-width: 60em) {

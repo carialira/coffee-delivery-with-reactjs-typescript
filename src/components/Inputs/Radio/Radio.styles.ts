@@ -2,7 +2,7 @@ import styled from "styled-components";
 import { mixins } from "../../../styles/mixins";
 
 interface ContainerLabelProps {
-  isSelected: boolean;
+  $isSelected: boolean;
 }
 
 export const ContainerLabel = styled.label<ContainerLabelProps>`
@@ -17,10 +17,10 @@ export const ContainerLabel = styled.label<ContainerLabelProps>`
 
   color: ${({ theme }) => theme["base-text"]};
 
-  background-color: ${({ isSelected, theme }) =>
-    isSelected ? theme["purple-light"] : theme["base-button"]};
-  border: ${({ isSelected, theme }) =>
-    isSelected ? `0.1rem solid ${theme.purple}` : "0.1rem solid transparent"};
+  background-color: ${({ $isSelected, theme }) =>
+    $isSelected ? theme["purple-light"] : theme["base-button"]};
+  border: ${({ $isSelected, theme }) =>
+    $isSelected ? `0.1rem solid ${theme.purple}` : "0.1rem solid transparent"};
 
   ${mixins.fonts.buttonM}
   text-transform: uppercase;

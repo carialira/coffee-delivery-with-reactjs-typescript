@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { CheckFat, ShoppingCart } from "@phosphor-icons/react";
 import {
   CoffeeImage,
@@ -13,7 +14,7 @@ import { useTheme } from "styled-components";
 import { Quantity } from "../Inputs/Quantity/Quantity";
 import { useContext, useEffect, useState } from "react";
 import { CartContext } from "../../contexts/CartContextProvider";
-import { CoffeesItens } from "../../Types/Cart.types";
+import { CoffeesItens } from "../../types/Cart.types";
 
 type PropsCard = {
   coffee: CoffeesItens;
@@ -43,6 +44,7 @@ export function Card({ coffee }: PropsCard) {
 
     if (isItemAdded) {
       timeout = setTimeout(() => {
+        if (quantity > 1) setQuantity(1);
         setIsItemAdded(false);
       }, 1000);
     }
@@ -52,7 +54,7 @@ export function Card({ coffee }: PropsCard) {
         clearTimeout(timeout);
       }
     };
-  }, [isItemAdded]);
+  }, [isItemAdded, quantity]);
 
   return (
     <ContainerCard>
@@ -77,12 +79,19 @@ export function Card({ coffee }: PropsCard) {
             decrement={decrement}
             increment={increment}
           />
+
           <Buy
             onClick={() => {
-              coffee.quantity = quantity;
-              setIsItemAdded(true);
-              addNewItensOfCart(coffee);
+              if (coffee && coffee.quantity !== undefined) {
+                const updatedCoffee = { ...coffee };
+                if (quantity && quantity >= 1) {
+                  updatedCoffee.quantity = quantity;
+                  setIsItemAdded(true);
+                  addNewItensOfCart(updatedCoffee);
+                }
+              }
             }}
+            disabled={isItemAdded}
           >
             {isItemAdded ? (
               <CheckFat weight="fill" size={22} color={theme["base-card"]} />
