@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { SubmitHandler, useForm, Controller } from "react-hook-form";
+import { SubmitHandler, useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
@@ -32,12 +32,10 @@ import { useTheme } from "styled-components";
 import { InputText } from "../../components/Inputs/Text/Text";
 import { Radio } from "../../components/Inputs/Radio/Radio";
 import { Quantity } from "../../components/Inputs/Quantity/Quantity";
-import { useContext, useEffect, useRef, useState } from "react";
+import { useContext, useState } from "react";
 import { CartContext } from "../../contexts/CartContextProvider";
-import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { normalizeCepNumber, removeFormat } from "../../utils/const";
-import { FormCartInputs } from "../../types/Cart.types";
 
 const newOrder = z.object({
   cep: z.string().min(8, "Informe o CEP"),
@@ -55,11 +53,13 @@ const newOrder = z.object({
 export type OrderDetails = z.infer<typeof newOrder>;
 
 export function Cart() {
-  const navigate = useNavigate();
   const theme = useTheme();
 
   const [disabled, setDisabled] = useState(true);
-  const [disabledAddressNumberAndComplement, setDisabledAddressNumberAndComplement] = useState(false);
+  const [
+    disabledAddressNumberAndComplement,
+    setDisabledAddressNumberAndComplement,
+  ] = useState(false);
 
   const {
     cart,
@@ -95,7 +95,6 @@ export function Cart() {
 
   const selectedPaymentMethod = watch("formaPagamento");
 
-
   const handleOrderCheckout: SubmitHandler<OrderDetails> = async (data) => {
     if (!cart || cart.length === 0) {
       return alert("É preciso ter pelo menos um item no carrinho");
@@ -116,13 +115,6 @@ export function Cart() {
 
   const totalCart = totalItems > 0 ? totalItems + deliveryPrice : 0;
 
-  useEffect(() => {
-    if (cart && cart.length <= 0) {
-      navigate("/");
-    }
-  }, [cart, navigate]);
-
-
   async function getAddressByApi(valueCep: string) {
     try {
       if (valueCep && valueCep !== "" && valueCep.length === 8) {
@@ -137,8 +129,6 @@ export function Cart() {
           setValue("bairro", data.bairro, { shouldValidate: true });
           setValue("cidade", data.localidade, { shouldValidate: true });
           setValue("estado", data.uf, { shouldValidate: true });
-          
-          
         } else {
           setDisabled(false);
           setDisabledAddressNumberAndComplement(false);
@@ -203,15 +193,15 @@ export function Cart() {
                     inputProps={{ style: { gridArea: "cep" } }}
                     {...register("cep")}
                     error={errors.cep}
-                    onFocus={(e)=>{
+                    onFocus={(e) => {
                       const { value } = e.target;
                       const cepValue: string = value ?? getValues("cep");
 
                       if (cepValue) {
-                      setValue("cep", removeFormat(value), {
-                        shouldValidate: true,
-                      });
-                    }
+                        setValue("cep", removeFormat(value), {
+                          shouldValidate: true,
+                        });
+                      }
                     }}
                     onBlur={(e) => {
                       const { value } = e.target;
@@ -253,7 +243,7 @@ export function Cart() {
                     error={errors.rua}
                     disabled={disabled}
                     maxLength={250}
-                    />
+                  />
                   <InputText
                     placeholder="Número"
                     inputProps={{ style: { gridArea: "numero" } }}
@@ -261,7 +251,7 @@ export function Cart() {
                     error={errors.numero}
                     maxLength={50}
                     disabled={disabledAddressNumberAndComplement}
-                    />
+                  />
                   <InputText
                     placeholder="Complemento"
                     inputProps={{ style: { gridArea: "complemento" } }}
