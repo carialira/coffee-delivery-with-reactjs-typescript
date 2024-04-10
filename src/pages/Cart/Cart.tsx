@@ -36,6 +36,7 @@ import { useContext, useState } from "react";
 import { CartContext } from "../../contexts/CartContextProvider";
 import axios from "axios";
 import { normalizeCepNumber, removeFormat } from "../../utils/const";
+import { Spinner } from "../../components/Spinner/Spinner";
 
 const newOrder = z.object({
   cep: z.string().min(8, "Informe o CEP"),
@@ -55,6 +56,7 @@ export type OrderDetails = z.infer<typeof newOrder>;
 export function Cart() {
   const theme = useTheme();
 
+  const [loading, setLoading] = useState(false);
   const [disabled, setDisabled] = useState(true);
   const [
     disabledAddressNumberAndComplement,
@@ -116,6 +118,7 @@ export function Cart() {
   const totalCart = totalItems > 0 ? totalItems + deliveryPrice : 0;
 
   async function getAddressByApi(valueCep: string) {
+    setLoading(true)
     try {
       if (valueCep && valueCep !== "" && valueCep.length === 8) {
         const { data } = await axios.get(
@@ -170,10 +173,13 @@ export function Cart() {
 
       console.log(error, "error");
     }
+    setLoading(false)
   }
 
-  return (
-    <ContainerCart>
+  return ( <>   
+    {
+        loading ? (<Spinner/>) : 
+    (<ContainerCart>
       {cart && cart.length > 0 && (
         <>
           <Content>
@@ -409,6 +415,6 @@ export function Cart() {
           </Content>
         </>
       )}
-    </ContainerCart>
+    </ContainerCart> ) }</>
   );
 }
