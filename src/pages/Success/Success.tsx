@@ -10,17 +10,13 @@ import { useTheme } from "styled-components";
 import { useContext } from "react";
 import { CartContext } from "../../contexts/CartContextProvider";
 import { useParams } from "react-router-dom";
-import { Order } from "../../types/Cart.types";
 
 export function Success() {
   const theme = useTheme();
   const { orders } = useContext(CartContext);
   const { orderId } = useParams();
 
-  const orderDetails: Order = orders?.find((order) => order.id === orderId);
-  console.log(orderId, "orderId");
-  console.log(orderDetails, "orderDetails");
-  console.log(orders, "orders");
+  const orderDetails = orders?.find((order) => order.id === orderId);
 
   const paymentMethod = {
     credito: "Cartão de crédito",
@@ -48,12 +44,12 @@ export function Success() {
                 <span>
                   Entrega em{" "}
                   <strong>
-                    {orderDetails.rua}, {orderDetails.numero}
+                    {orderDetails?.rua}, {orderDetails?.numero}
                   </strong>
                 </span>
                 <span>
-                  {orderDetails.bairro} - {orderDetails.cidade},{" "}
-                  {orderDetails.estado.toUpperCase()}
+                  {orderDetails?.bairro} - {orderDetails?.cidade},{" "}
+                  {orderDetails?.estado.toUpperCase()}
                 </span>
               </div>
             </div>
@@ -77,7 +73,10 @@ export function Success() {
               />
               <div>
                 <span>Pagamento na entrega</span>
-                <strong>{paymentMethod[orderDetails.formaPagamento]}</strong>
+                <strong>
+                  {orderDetails?.formaPagamento &&
+                    paymentMethod[orderDetails?.formaPagamento]}
+                </strong>
               </div>
             </div>
           </AddressDelivery>

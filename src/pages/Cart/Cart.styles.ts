@@ -74,7 +74,7 @@ export const AddressHeader = styled(BaseAddressHeader)``;
 
 export const AddressForm = styled.div`
   display: grid;
-  grid-template-columns: repeat(2, 1fr) 6rem;
+  grid-template-columns: repeat(2, 1fr) 7rem;
   gap: 1.6rem;
   grid-template-areas:
     "cep . ."

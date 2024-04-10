@@ -1,4 +1,5 @@
-import { SubmitHandler, useForm } from "react-hook-form";
+/* eslint-disable @typescript-eslint/no-unused-vars */
+import { SubmitHandler, useForm, Controller } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
@@ -31,12 +32,15 @@ import { useTheme } from "styled-components";
 import { InputText } from "../../components/Inputs/Text/Text";
 import { Radio } from "../../components/Inputs/Radio/Radio";
 import { Quantity } from "../../components/Inputs/Quantity/Quantity";
-import { useContext, useEffect } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import { CartContext } from "../../contexts/CartContextProvider";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
+import { normalizeCepNumber, removeFormat } from "../../utils/const";
+import { FormCartInputs } from "../../types/Cart.types";
 
 const newOrder = z.object({
-  cep: z.number({ invalid_type_error: "Informe o CEP" }),
+  cep: z.string().min(8, "Informe o CEP"),
   rua: z.string().min(1, "Informe a rua"),
   numero: z.string().min(1, "Informe o número"),
   complemento: z.string(),
@@ -54,6 +58,9 @@ export function Cart() {
   const navigate = useNavigate();
   const theme = useTheme();
 
+  const [disabled, setDisabled] = useState(true);
+  const [disabledAddressNumberAndComplement, setDisabledAddressNumberAndComplement] = useState(false);
+
   const {
     cart,
     removeItemOfCart,
@@ -67,11 +74,27 @@ export function Cart() {
     handleSubmit,
     watch,
     formState: { errors },
+    getValues,
+    setValue,
+    reset,
+    setFocus,
   } = useForm<OrderDetails>({
+    mode: "all",
     resolver: zodResolver(newOrder),
+    defaultValues: {
+      cep: "",
+      rua: "",
+      numero: "",
+      complemento: "",
+      bairro: "",
+      cidade: "",
+      estado: "",
+      formaPagamento: "credito" || "debito" || "dinheiro",
+    },
   });
 
   const selectedPaymentMethod = watch("formaPagamento");
+
 
   const handleOrderCheckout: SubmitHandler<OrderDetails> = async (data) => {
     if (!cart || cart.length === 0) {
@@ -97,7 +120,67 @@ export function Cart() {
     if (cart && cart.length <= 0) {
       navigate("/");
     }
-  }, []);
+  }, [cart, navigate]);
+
+
+  async function getAddressByApi(valueCep: string) {
+    try {
+      if (valueCep && valueCep !== "" && valueCep.length === 8) {
+        const { data } = await axios.get(
+          `https://viacep.com.br/ws/${valueCep}/json/`
+        );
+        console.log(data, "data");
+        if (data && data.cep && data.localidade && data.logradouro) {
+          setDisabled(true);
+          setDisabledAddressNumberAndComplement(false);
+          setValue("rua", data.logradouro, { shouldValidate: true });
+          setValue("bairro", data.bairro, { shouldValidate: true });
+          setValue("cidade", data.localidade, { shouldValidate: true });
+          setValue("estado", data.uf, { shouldValidate: true });
+          
+          
+        } else {
+          setDisabled(false);
+          setDisabledAddressNumberAndComplement(false);
+
+          if (
+            getValues("cep") &&
+            getValues("cep") !== undefined &&
+            getValues("cidade") &&
+            getValues("estado")
+          ) {
+            reset({
+              rua: "",
+              numero: "",
+              complemento: "",
+              bairro: "",
+            });
+            // refRua?.current.focus();
+          }
+          setFocus("rua", { shouldSelect: true });
+        }
+      } else {
+        setDisabled(true);
+        setDisabledAddressNumberAndComplement(true);
+        setFocus("cep", { shouldSelect: true });
+        console.log("else");
+        reset({
+          cep: "",
+          rua: "",
+          numero: "",
+          complemento: "",
+          bairro: "",
+          cidade: "",
+          estado: "",
+        });
+      }
+    } catch (error) {
+      setDisabled(false);
+      setDisabledAddressNumberAndComplement(false);
+
+      console.log(error, "error");
+    }
+  }
 
   return (
     <ContainerCart>
@@ -118,39 +201,91 @@ export function Cart() {
                   <InputText
                     placeholder="CEP"
                     inputProps={{ style: { gridArea: "cep" } }}
-                    {...register("cep", { valueAsNumber: true })}
+                    {...register("cep")}
                     error={errors.cep}
+                    onFocus={(e)=>{
+                      const { value } = e.target;
+                      const cepValue: string = value ?? getValues("cep");
+
+                      if (cepValue) {
+                      setValue("cep", removeFormat(value), {
+                        shouldValidate: true,
+                      });
+                    }
+                    }}
+                    onBlur={(e) => {
+                      const { value } = e.target;
+                      const cepValue: string = value ?? getValues("cep");
+
+                      if (cepValue) {
+                        getAddressByApi(cepValue).then(() => {
+                          setValue("cep", normalizeCepNumber(value), {
+                            shouldValidate: true,
+                          });
+                          setFocus("numero", { shouldSelect: true });
+                        });
+                      }
+                    }}
+                    onChange={(e) => {
+                      const { value } = e.target;
+                      if (!value) {
+                        setDisabled(false);
+                        setDisabledAddressNumberAndComplement(false);
+
+                        reset({
+                          rua: "",
+                          numero: "",
+                          complemento: "",
+                          bairro: "",
+                          cidade: "",
+                          estado: "",
+                        });
+                      }
+                    }}
+                    // ref={refCep}
+                    maxLength={8}
                   />
+
                   <InputText
                     placeholder="Rua"
                     inputProps={{ style: { gridArea: "rua" } }}
                     {...register("rua")}
                     error={errors.rua}
-                  />
+                    disabled={disabled}
+                    maxLength={250}
+                    />
                   <InputText
                     placeholder="Número"
                     inputProps={{ style: { gridArea: "numero" } }}
                     {...register("numero")}
                     error={errors.numero}
-                  />
+                    maxLength={50}
+                    disabled={disabledAddressNumberAndComplement}
+                    />
                   <InputText
                     placeholder="Complemento"
                     inputProps={{ style: { gridArea: "complemento" } }}
                     optional
                     {...register("complemento")}
                     error={errors.complemento}
+                    disabled={disabledAddressNumberAndComplement}
+                    maxLength={250}
                   />
                   <InputText
                     placeholder="Bairro"
                     inputProps={{ style: { gridArea: "bairro" } }}
                     {...register("bairro")}
                     error={errors.bairro}
+                    disabled={disabled}
+                    maxLength={250}
                   />
                   <InputText
                     placeholder="Cidade"
                     inputProps={{ style: { gridArea: "cidade" } }}
                     {...register("cidade")}
                     error={errors.cidade}
+                    disabled={disabled}
+                    maxLength={250}
                   />
                   <InputText
                     placeholder="UF"
@@ -158,6 +293,7 @@ export function Cart() {
                     inputProps={{ style: { gridArea: "estado" } }}
                     {...register("estado")}
                     error={errors.estado}
+                    disabled={disabled}
                   />
                 </AddressForm>
               </AddressContent>

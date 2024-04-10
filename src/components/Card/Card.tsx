@@ -60,8 +60,8 @@ export function Card({ coffee }: PropsCard) {
     <ContainerCard>
       <CoffeeImage src={coffee.image} alt={coffee.title} />
       <TagCoffee>
-        {coffee.tags.map((tag) => {
-          return <span>{tag}</span>;
+        {coffee.tags.map((tag, idx:number) => {
+          return <span key={idx}>{tag}</span>;
         })}
       </TagCoffee>
 
